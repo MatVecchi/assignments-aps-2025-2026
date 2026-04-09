@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <string.h>
-#include <windows.h>
 
 #define N 5
 #define MAX_STRING_LENGTH 10
@@ -15,22 +14,10 @@ int main(){
     for(int i = 0; i < N * 2; i++){
         printf("Utente %d inserisci un nome: ", (i % 2) + 1);
         scanf("%s", names[i]);
-        LARGE_INTEGER freq, start, end;
-        QueryPerformanceFrequency(&freq);
-        QueryPerformanceCounter(&start);
-
-
         if(!canInsert(names, i, names[i])){
             user += (i % 2) + 1;
         }
-
         insert(names, &count, names[i]);
-        QueryPerformanceCounter(&end);
-
-        double elapsed = (double)(end.QuadPart - start.QuadPart) / freq.QuadPart;
-        printf("Tempo: %.9f secondi\n", elapsed);
-
-
     }
 
     if(user != 0) {

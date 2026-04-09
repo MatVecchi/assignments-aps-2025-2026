@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 #define N 5
 #define MAX_STRING_LENGTH 10
@@ -27,15 +26,11 @@ int main(int argc, char const *argv[])
     for(int i = 0; i < N * 2; i++){
         printf("Utente %d inserisci un nome: ", (i % 2) + 1);
         scanf("%s", str);
-        clock_t start = clock();
         if(!canInsert(lastStr, str, names)){
             user += (i % 2) + 1;
         }
         insert(str, names);
         strncpy(lastStr, str, MAX_STRING_LENGTH);
-         clock_t end = clock();
-        double time_spent = (double)(end - start) / CLOCKS_PER_SEC;
-        printf("Tempo impiegato: %f secondi\n", time_spent);
     }
 
     if(user != 0) {
