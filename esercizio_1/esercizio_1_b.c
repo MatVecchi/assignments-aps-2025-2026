@@ -15,7 +15,7 @@ typedef struct Node {
 } Node;
 
 int canInsert(char lastStr[MAX_STRING_LENGTH], char str[MAX_STRING_LENGTH], Node** hashtable);
-void insert(char str[MAX_STRING_LENGTH], Node** hashtable);
+int insert(char str[MAX_STRING_LENGTH], Node** hashtable);
 
 int main(int argc, char const *argv[])
 {
@@ -26,10 +26,11 @@ int main(int argc, char const *argv[])
     for(int i = 0; i < N * 2; i++){
         printf("Utente %d inserisci un nome: ", (i % 2) + 1);
         scanf("%s", str);
-        if(!canInsert(lastStr, str, names)){
+        
+        int res = insert(str, names);
+        if(!res){
             user += (i % 2) + 1;
         }
-        insert(str, names);
         strncpy(lastStr, str, MAX_STRING_LENGTH);
     }
 
@@ -75,12 +76,13 @@ int canInsert(char lastStr[MAX_STRING_LENGTH], char str[MAX_STRING_LENGTH], Node
     return 1;
 }
 
-void insert(char str[MAX_STRING_LENGTH], Node** hashtable){
-    if(!canInsert(str, str, hashtable)) return;
+int insert(char str[MAX_STRING_LENGTH], Node** hashtable){
+    if(!canInsert(str, str, hashtable)) return 0;
 
     unsigned long hash = oaat(str, strlen(str), HASH_BITS);
     Node* new_node = malloc(sizeof(Node));
     new_node->next = hashtable[hash];
     strcpy(new_node->name, str);
     hashtable[hash] = new_node;
+    return 1;
 }
