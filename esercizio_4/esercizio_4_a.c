@@ -1,33 +1,32 @@
 #include <stdio.h>
 
+int verify_path(int D, int total_points, int points[], int C, int L, int M, int print_mode) {
+    int removed = 0;
+    int last_kept = 0;
 
-int verifica_percorso(int D, int tot_punti, int punti[], int C, int L, int M, int print_mode) {
-    int rimosse = 0;
-    int ultimo_tenuto = 0;
-
-    for (int i = 1; i < tot_punti; i++) {
-        int p = punti[i];
+    for (int i = 1; i < total_points; i++) {
+        int p = points[i];
         
-        int obbligatorio = (p == C || p == L);
-        int prossimo_obbligatorio = (p < C) ? C : L;
+        int mandatory = (p == C || p == L);
+        int next_mandatory = (p < C) ? C : L;
         
-        if (p - punti[ultimo_tenuto] < D || (!obbligatorio && prossimo_obbligatorio - p < D)) {
+        if (p - points[last_kept] < D || (!mandatory && next_mandatory - p < D)) {
             
-            if (obbligatorio) {
+            if (mandatory) {
                 return 0; 
             } else {
-                rimosse++;
+                removed++;
                 if (print_mode) {
                     printf("%d ", p);
                 }
             }
             
         } else {
-            ultimo_tenuto = i;
+            last_kept = i;
         }
     }
     
-    return rimosse <= M;
+    return removed <= M;
 }
 
 int main() {
@@ -35,21 +34,21 @@ int main() {
 
     scanf("%d %d %d", &L, &N, &M);
 
-    int tot_punti = N + 2;
-    int punti[tot_punti];
+    int total_points = N + 2;
+    int points[total_points];
     
-    punti[0] = 0;
+    points[0] = 0;
     for (int i = 1; i <= N; i++) {
-        scanf("%d", &punti[i]);
+        scanf("%d", &points[i]);
     }
-    punti[N + 1] = L;
+    points[N + 1] = L;
     
     scanf("%d", &C);
 
     int best_D = 1;
     
     for (int d = L; d >= 1; d--) {
-        if (verifica_percorso(d, tot_punti, punti, C, L, M, 0)) {
+        if (verify_path(d, total_points, points, C, L, M, 0)) {
             best_D = d;
             break;
         }
@@ -58,7 +57,7 @@ int main() {
     printf("Spaziatura massima: %d\n", best_D);
     printf("Stazioni da chiudere: ");
     
-    verifica_percorso(best_D, tot_punti, punti, C, L, M, 1);
+    verify_path(best_D, total_points, points, C, L, M, 1);
     printf("\n");
 
     return 0;

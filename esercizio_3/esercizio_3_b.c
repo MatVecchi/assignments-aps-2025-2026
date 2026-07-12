@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-int dividi_in_canali_memo(int N, int T, int idx, int durate[], int canali[], int sum1, int sum2, int memo[N+1][T+1]) {
+int divide_into_channels(int N, int T, int idx, int durations[], int channels[], int sum1, int sum2, int memo[N+1][T+1]) {
     if (idx == N) {
         return 1; 
     }
@@ -9,19 +9,19 @@ int dividi_in_canali_memo(int N, int T, int idx, int durate[], int canali[], int
         return memo[idx][sum1] == 1;
     }
 
-    int durata = durate[idx];
+    int duration = durations[idx];
 
-    if (sum1 + durata <= T) {
-        canali[idx] = 1;
-        if (dividi_in_canali_memo(N, T, idx + 1, durate, canali, sum1 + durata, sum2, memo)) {
+    if (sum1 + duration <= T) {
+        channels[idx] = 1;
+        if (divide_into_channels(N, T, idx + 1, durations, channels, sum1 + duration, sum2, memo)) {
             memo[idx][sum1] = 1;
             return 1;
         }
     }
 
-    if (sum2 + durata <= T) {
-        canali[idx] = 2;
-        if (dividi_in_canali_memo(N, T, idx + 1, durate, canali, sum1, sum2 + durata, memo)) {
+    if (sum2 + duration <= T) {
+        channels[idx] = 2;
+        if (divide_into_channels(N, T, idx + 1, durations, channels, sum1, sum2 + duration, memo)) {
             memo[idx][sum1] = 1;
             return 1;
         }
@@ -38,9 +38,9 @@ int main() {
         return 1;
     }
 
-    int durate_pause[N];
-    int canali[N];
-    int inizio_pause[N];
+    int break_durations[N];
+    int channels[N];
+    int break_starts[N];
 
     int memo[N+1][T+1];
 
@@ -51,29 +51,29 @@ int main() {
     }
 
     for (int i = 0; i < N; i++) {
-        scanf("%d", &durate_pause[i]);
-        canali[i] = 0;
+        scanf("%d", &break_durations[i]);
+        channels[i] = 0;
     }
 
-    if (dividi_in_canali_memo(N, T, 0, durate_pause, canali, 0, 0, memo)) {
+    if (divide_into_channels(N, T, 0, break_durations, channels, 0, 0, memo)) {
         int timer_c1 = 0;
         int timer_c2 = 0;
 
         for (int i = 0; i < N; i++) {
-            if (canali[i] == 1) {
-                inizio_pause[i] = timer_c1;
-                timer_c1 += durate_pause[i];
-                printf("Tecnico %d: in pausa da min %d a min %d (durata %d)\n", 
-                       i + 1, inizio_pause[i], timer_c1, durate_pause[i]);
+            if (channels[i] == 1) {
+                break_starts[i] = timer_c1;
+                timer_c1 += break_durations[i];
+                printf("Tecnico %d: in pausa da %d a %d (durata %d)\n", 
+                       i + 1, break_starts[i], timer_c1, break_durations[i]);
             } else {
-                inizio_pause[i] = timer_c2;
-                timer_c2 += durate_pause[i];
-                printf("Tecnico %d: in pausa da min %d a min %d (durata %d)\n", 
-                       i + 1, inizio_pause[i], timer_c2, durate_pause[i]);
+                break_starts[i] = timer_c2;
+                timer_c2 += break_durations[i];
+                printf("Tecnico %d: in pausa da %d a %d (durata %d)\n", 
+                       i + 1, break_starts[i], timer_c2, break_durations[i]);
             }
         }
     } else {
-        printf("Nessuna soluzione possibile.\n");
+        printf("No solution possible.\n");
     }
 
     return 0;
