@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <stdlib.h>
+#include <limits.h>
 
 typedef struct {
     int id;
@@ -18,19 +20,11 @@ void swap_candidates(Candidate **a, Candidate **b) {
     *b = temp;
 }
 
-void sift_up(MaxHeap *heap, int idx) {
-    while (idx > 0 && heap->array[(idx - 1) / 2]->criticality < heap->array[idx]->criticality) {
-        swap_candidates(&heap->array[(idx - 1) / 2], &heap->array[idx]);
-        idx = (idx - 1) / 2;
-    }
-}
-
 void sift_down(MaxHeap *heap, int idx) {
     int max_idx = idx;
     int left = 2 * idx + 1;
     int right = 2 * idx + 2;
 
-    
     if (left < heap->size && heap->array[left]->criticality > heap->array[max_idx]->criticality) {
         max_idx = left;
     }
@@ -45,9 +39,14 @@ void sift_down(MaxHeap *heap, int idx) {
 }
 
 void heap_push(MaxHeap *heap, Candidate *c) {
-    heap->array[heap->size] = c;
+    int idx = heap->size;
+    heap->array[idx] = c;
     heap->size++;
-    sift_up(heap, heap->size - 1);
+    
+    while (idx > 0 && heap->array[(idx - 1) / 2]->criticality < heap->array[idx]->criticality) {
+        swap_candidates(&heap->array[(idx - 1) / 2], &heap->array[idx]);
+        idx = (idx - 1) / 2;
+    }
 }
 
 void heap_pop(MaxHeap *heap) {
@@ -61,7 +60,6 @@ int cmp_rel_desc(const void *a, const void *b) {
 }
 
 void find_best_team(int C, int P, Candidate candidates[], int best_team[], int *max_quality) {
-    
     if (P == 1) {
         *max_quality = candidates[0].reliability - candidates[0].criticality;
         best_team[0] = candidates[0].id;
@@ -82,14 +80,14 @@ void find_best_team(int C, int P, Candidate candidates[], int best_team[], int *
     heap.size = 0;
     heap.array = malloc(sizeof(Candidate*) * heap.capacity);
 
-    *max_quality = -1000000000;
+    *max_quality = INT_MIN;
 
     for (int i = 0; i < C; i++) {
         
         if (heap.size == P - 1) {
-            
             int current_min_rel = candidates[i].reliability;
             int current_max_crit = candidates[i].criticality;
+            
             if (heap.array[0]->criticality > current_max_crit) {
                 current_max_crit = heap.array[0]->criticality;
             }
@@ -119,25 +117,31 @@ void find_best_team(int C, int P, Candidate candidates[], int best_team[], int *
 
 int main() {
     int C, P;
+    int max_quality = INT_MIN;
     
     scanf("%d %d", &C, &P);
 
     Candidate candidates[C];
     int best_team[P];
-    int max_quality;
 
     for (int i = 0; i < C; i++) {
-        candidates[i].id = i + 1;
+        candidates[i].id = i;
+        printf("\nInserisci i dati per il candidato %d:\n", i + 1);
         scanf("%d %d", &candidates[i].reliability, &candidates[i].criticality);
     }
     
     find_best_team(C, P, candidates, best_team, &max_quality);
     
-    printf("Selected candidates: ");
-    for (int i = 0; i < P; i++) {
-        printf("%d ", best_team[i]);
+    if (max_quality != INT_MIN) {
+        printf("La qualita massima ottenibile e: %d\n", max_quality);
+        printf("Il team ottimo e composto dai candidati: ");
+        for (int i = 0; i < P; i++) {
+            printf("%d ", best_team[i]);
+        }
+        printf("\n");
+    } else {
+        printf("\nNessun team valido trovato.\n");
     }
-    printf("\nTeam quality: %d\n", max_quality);
 
     return 0;
 }

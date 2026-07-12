@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <limits.h>
 
 typedef struct {
     int id;
@@ -6,65 +7,71 @@ typedef struct {
     int criticality;
 } Candidate;
 
-void find_best_team(int C, int P, Candidate candidates[], int best_team[], int *max_quality) {
-    int solution_found = 0;
-    int temp_team[C];
-    
-    *max_quality = -1000000000; 
+void evaluate_current_team(int P, Candidate *candidates, int *current_team, int *best_team, int *max_quality) {
+    int min_reliability = INT_MAX;
+    int max_criticality = INT_MIN;
 
-    for (int i = 0; i < C; i++) {
-        int threshold_rel = candidates[i].reliability;
+    for (int i = 0; i < P; i++) {
+        int index = current_team[i];
+        if (candidates[index].reliability < min_reliability) {
+            min_reliability = candidates[index].reliability;
+        }
+        if (candidates[index].criticality > max_criticality) {
+            max_criticality = candidates[index].criticality;
+        }
+    }
 
-        for (int j = 0; j < C; j++) {
-            int threshold_crit = candidates[j].criticality;
-            int theoretical_quality = threshold_rel - threshold_crit;
-            
-            int valid_count = 0;
-
-            for (int k = 0; k < C; k++) {
-                if (candidates[k].reliability >= threshold_rel && 
-                    candidates[k].criticality <= threshold_crit) {
-                    
-                    temp_team[valid_count] = candidates[k].id;
-                    valid_count++;
-                }
-            }
-
-            if (valid_count >= P) {
-                if (!solution_found || theoretical_quality > *max_quality) {
-                    *max_quality = theoretical_quality;
-                    solution_found = 1;
-                    
-                    for (int k = 0; k < P; k++) {
-                        best_team[k] = temp_team[k];
-                    }
-                }
-            }
+    int quality = min_reliability - max_criticality;
+    if (quality > *max_quality) {
+        *max_quality = quality;
+        for (int i = 0; i < P; i++) {
+            best_team[i] = current_team[i];
         }
     }
 }
 
+void explore_decision_tree(int candidate_index, int selected, int C, int P, Candidate *candidates, int *current_team, int *best_team, int *max_quality) {
+    if (selected == P) {
+        evaluate_current_team(P, candidates, current_team, best_team, max_quality);
+        return;
+    }
+
+    if (candidate_index == C) {
+        return;
+    }
+
+    current_team[selected] = candidate_index;
+    explore_decision_tree(candidate_index + 1, selected + 1, C, P, candidates, current_team, best_team, max_quality);
+    explore_decision_tree(candidate_index + 1, selected, C, P, candidates, current_team, best_team, max_quality);
+}
+
 int main() {
     int C, P;
+    int max_quality = INT_MIN;
     
     scanf("%d %d", &C, &P);
 
     Candidate candidates[C];
+    int current_team[P];
     int best_team[P];
-    int max_quality;
 
     for (int i = 0; i < C; i++) {
-        candidates[i].id = i + 1;
+        candidates[i].id = i;
+        printf("\nInserisci i dati per il candidato %d:\n", i + 1);
         scanf("%d %d", &candidates[i].reliability, &candidates[i].criticality);
     }
-    
-    find_best_team(C, P, candidates, best_team, &max_quality);
-    
-    printf("Selected candidates: ");
-    for (int i = 0; i < P; i++) {
-        printf("%d ", best_team[i]);
+
+    explore_decision_tree(0, 0, C, P, candidates, current_team, best_team, &max_quality);
+
+    if (max_quality != INT_MIN) {
+        printf("La qualita massima ottenibile e: %d\n", max_quality);
+        printf("Il team ottimo e composto dai candidati: ");
+        for (int i = 0; i < P; i++) {
+            printf("%d ", candidates[best_team[i]].id);
+        }
+    } else {
+        printf("\nNessun team valido trovato.\n");
     }
-    printf("\nTeam quality: %d\n", max_quality);
 
     return 0;
 }
